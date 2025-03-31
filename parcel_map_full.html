@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Parcel Map Demo</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <style>#map { height: 100vh; }</style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+  var map = L.map('map').setView([34.0426, -118.5286], 16);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  function onEachFeature(feature, layer) {
+    var props = feature.properties;
+    var apn = encodeURIComponent(props.APN_1);
+    var address = encodeURIComponent(props.SitusFullAddress);
+    var formURL = "https://docs.google.com/forms/d/e/1FAIpQLSeXInd6e0-MX-u9EGnlbZ53Z_SQGLO_kIZxjc-5pR5ptbKX-g/viewform" +
+                  "?entry.1119155325=" + apn +
+                  "&entry.1693961180=" + address;
+
+    layer.on({
+      click: function() {
+        window.open(formURL, '_blank');
+      }
+    });
+
+    layer.bindTooltip(props.SitusFullAddress || 'Parcel');
+  }
+
+  fetch("2025_Parcels_with_DINS_data.geojson")
+    .then(response => response.json())
+    .then(geojsonData => {
+      L.geoJSON(geojsonData, {
+        onEachFeature: onEachFeature,
+        style: function () {
+          return { color: "#0074D9", weight: 1, fillOpacity: 0.4 };
+        }
+      }).addTo(map);
+    });
+</script>
+</body>
+</html>
